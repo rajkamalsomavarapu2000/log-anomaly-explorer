@@ -22,6 +22,7 @@
         <input id="fileInput" type="file" accept=".log,.txt,.out,.json,.csv,*/*"/>
         <button id="btnParse">Parse Preview</button>
         <button id="btnAnalyze" class="primary">Analyze Anomalies</button>
+        <button id="btnSpikes">Detect Spikes</button>
       </div>
       <p class="hint">Tip: works best with logs containing timestamp + level (INFO/WARN/ERROR etc.).</p>
     </section>
@@ -46,7 +47,31 @@
     <section class="card">
       <h2>Rare Patterns</h2>
       <p class="hint">Baseline detector: patterns with lowest frequency. Next iterations can add spikes, sequences, scoring, etc.</p>
+      <div class="row">
+        <label>Level: <input id="rareLevelFilter" placeholder="e.g. ERROR"/></label>
+        <label>Logger: <input id="rareLoggerFilter" placeholder="e.g. my.module"/></label>
+        <label>Sort: <select id="rareSort">
+          <option value="score">Score (High to Low)</option>
+          <option value="count">Count (Low to High)</option>
+        </select></label>
+      </div>
       <div id="rare" class="table"></div>
+    </section>
+
+    <section class="card">
+      <h2>Time-Window Spikes</h2>
+      <p class="hint">Spike detector: patterns with sudden frequency increase within 60-second windows.</p>
+      <div class="row">
+        <label>Level: <input id="spikeLevelFilter" placeholder="e.g. INFO"/></label>
+        <label>Logger: <input id="spikeLoggerFilter" placeholder="e.g. my.module"/></label>
+        <label>Time From: <input id="spikeTimeFrom" type="datetime-local"/></label>
+        <label>Time To: <input id="spikeTimeTo" type="datetime-local"/></label>
+        <label>Sort: <select id="spikeSort">
+          <option value="score">Score (High to Low)</option>
+          <option value="count">Count (Low to High)</option>
+        </select></label>
+      </div>
+      <div id="spikes" class="table"></div>
     </section>
 
     <footer class="footer">

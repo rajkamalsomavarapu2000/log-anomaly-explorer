@@ -1,5 +1,6 @@
 import re
 from typing import Optional, Tuple, Dict
+import datetime
 
 LEVELS = ("TRACE", "DEBUG", "INFO", "WARN", "WARNING", "ERROR", "FATAL", "CRITICAL")
 
@@ -33,6 +34,19 @@ def parse_line(line: str) -> Tuple[Optional[str], Optional[str], Optional[str], 
         pass
 
     return ts, level, logger, msg
+
+def parse_ts(ts: str) -> Optional[float]:
+    if not ts:
+        return None
+    ts = ts.replace(',', '.')
+    formats = ["%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%dT%H:%M:%SZ"]
+    for fmt in formats:
+        try:
+            dt = datetime.datetime.strptime(ts, fmt)
+            return dt.timestamp()
+        except ValueError:
+            pass
+    return None
 
 def fingerprint(ts: Optional[str], level: Optional[str], logger: Optional[str], msg: str) -> str:
     """

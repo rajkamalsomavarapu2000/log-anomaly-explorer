@@ -1,13 +1,14 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from collections import defaultdict
 from typing import List, Dict
 
-from .models import ParseResponse, ParsedLogLine, AnomalyResponse
+from .models import ParseResponse, ParsedLogLine, AnomalyResponse, SpikeResponse
 from .log_parser import parse_line, fingerprint
-from .anomaly import rare_pattern_anomalies
+from .anomaly import rare_pattern_anomalies, spike_anomalies
 
 app = FastAPI(title="Log Anomaly Explorer", version="0.1.0")
 
@@ -18,6 +19,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/web", StaticFiles(directory="web"), name="web")
 
 @app.get("/")
 def root():
@@ -71,15 +74,39 @@ async def api_analyze(file: UploadFile = File(...), top_k: int = 10):
 
     for line in lines:
         ts, level, logger, msg = parse_line(line)
-        key = fingerprint(ts, level, logger, msg if msg else line)
-        keys.append(key)
-        if key not in example_by_key:
-            example_by_key[key] = msg if msg else line.strip()
+        if level:
+            key = fingerprint(ts, level, logger, msg if msg else line)
+            keys.append(key)
+            if key not in example_by_key:
+                example_by_key[key] = msg if msg else line.strip()
 
-    rare = rare_pattern_anomalies(keys, example_by_key, top_k=top_k)
+    rare_patterns = rare_pattern_anomalies(keys, example_by_key, top_k=top_k)
 
     return AnomalyResponse(
         total_lines=len(lines),
         unique_patterns=len(set(keys)),
-        rare_patterns=rare
+        rare_patterns=rare_patterns
+    )
+
+
+@app.post("/api/spikes")
+async def api_spikes(file: UploadFile = File(...), window_size: int = 60, top_k: int = 10):
+    data = await file.read()
+    text = data.decode("utf-8", errors="replace")
+    lines = text.splitlines()
+
+    spikes = spike_anomalies(lines, window_size=window_size, top_k=top_k)
+
+    # Count unique patterns (though not used directly, for consistency)
+    keys = []
+    for line in lines:
+        ts, level, logger, msg = parse_line(line)
+        if level:
+            key = fingerprint(ts, level, logger, msg if msg else line)
+            keys.append(key)
+
+    return SpikeResponse(
+        total_lines=len(lines),
+        unique_patterns=len(set(keys)),
+        spike_patterns=spikes
     )

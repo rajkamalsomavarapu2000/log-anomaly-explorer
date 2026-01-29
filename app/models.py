@@ -18,9 +18,24 @@ class ParseResponse(BaseModel):
 class AnomalyItem(BaseModel):
     key: str
     count: int
+    score: float
+    explanation: str
     example_message: str
 
 class AnomalyResponse(BaseModel):
     total_lines: int
     unique_patterns: int
     rare_patterns: List[AnomalyItem]
+
+class SpikeItem(BaseModel):
+    key: str
+    window_ts: float
+    count: int
+    score: float
+    explanation: str
+    example_message: str
+
+class SpikeResponse(BaseModel):
+    total_lines: int
+    unique_patterns: int
+    spike_patterns: List[SpikeItem]
