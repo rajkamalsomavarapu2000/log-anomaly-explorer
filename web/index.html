@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Log Anomaly Explorer</title>
+  <link rel="stylesheet" href="/web/styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div>
+        <h1>Log Anomaly Explorer</h1>
+        <p class="sub">Upload logs → preview structure → find rare patterns (baseline anomalies).</p>
+      </div>
+      <div class="pill" id="healthPill">Checking…</div>
+    </header>
+
+    <section class="card">
+      <h2>Upload</h2>
+      <div class="row">
+        <input id="fileInput" type="file" accept=".log,.txt,.out,.json,.csv,*/*"/>
+        <button id="btnParse">Parse Preview</button>
+        <button id="btnAnalyze" class="primary">Analyze Anomalies</button>
+      </div>
+      <p class="hint">Tip: works best with logs containing timestamp + level (INFO/WARN/ERROR etc.).</p>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Summary</h2>
+        <div id="summary" class="mono muted">No file loaded.</div>
+      </div>
+
+      <div class="card">
+        <h2>Level Counts</h2>
+        <div id="levels" class="mono muted">—</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Preview (first 50 lines parsed)</h2>
+      <div id="preview" class="table"></div>
+    </section>
+
+    <section class="card">
+      <h2>Rare Patterns</h2>
+      <p class="hint">Baseline detector: patterns with lowest frequency. Next iterations can add spikes, sequences, scoring, etc.</p>
+      <div id="rare" class="table"></div>
+    </section>
+
+    <footer class="footer">
+      <span class="muted">v0.1 • FastAPI + Vanilla JS</span>
+    </footer>
+  </div>
+
+  <script src="/web/app.js"></script>
+</body>
+</html>
